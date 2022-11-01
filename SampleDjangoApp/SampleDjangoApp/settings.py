@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -37,6 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "web3auth.apps.Web3AuthConfig",
 ]
 
 MIDDLEWARE = [
@@ -54,7 +57,7 @@ ROOT_URLCONF = "SampleDjangoApp.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR/"templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -75,11 +78,21 @@ WSGI_APPLICATION = "SampleDjangoApp.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+        # "ENGINE": "django.db.backends.sqlite3",
+        # "NAME": BASE_DIR / "db.sqlite3",
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST' : 'tiny.db.elephantsql.com',
+        'PORT' : '5432',
+        'NAME' : 'engnvmju',
+        'USER': 'engnvmju',
+        'PASSWORD': 'xQ7mZAjY2hjbmXc-uGeHvPPA_W88T9wc',
+    },
 }
 
+if 'test' in sys.argv: # and 'keepdb' in sys.argv:
+    # and this allows you to use --keepdb to skip re-creating the db,
+    # even faster!
+    DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3'}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -93,6 +106,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'web3auth.backend.Web3Backend'
+]
+WEB3AUTH_USER_ADDRESS_FIELD = 'username'
+WEB3AUTH_USER_SIGNUP_FIELDS = ['email',]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
