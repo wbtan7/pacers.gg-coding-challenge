@@ -11,6 +11,7 @@
 
     <!-- styling -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gnb-ui@0.2.1-alpha/dist/gnb.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/quasar@2.10.1/dist/quasar.prod.css" rel="stylesheet" type="text/css">
 
     <!-- font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -18,7 +19,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My First dApp</title>
+    <title>Pacer Coding Challenge by WB</title>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
@@ -26,16 +27,53 @@
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
 
   </head>
-  <body>
+  <body style="font-family: Poppins,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif">
 
     <div id="app">
         {% verbatim %}
+        
+        <div class="navbar fixed top-0 shadow">
+            <div class="navbar-left"><!----><figure class="figure size-48">
+                <img src="/static/img/logo.png" />
+            </figure><a aria-current="page" href="/" class="router-link-active router-link-exact-active navbar-brand fw-700" style="color:rgb(112, 23, 112);"><span>Pacer Coding Challenge</span></a>
+            <button class="btn navbar-burger-icon"><span></span><span></span><span></span></button></div><div class="navbar-center">
+                
+                <a class="navbar-item mb-5" target="_blank" href="https://github.com/wbtan7"><i class="ri-github-fill fs-3"></i></a><span class="tag secondary fw-600">v-0.0.1 by [wbtan7] Nov 2022</span>
+            </div>
+        </div>
+        
+        <div class="docs bg-gray-2" style="height: 100%;overflow: auto;border-top-left-radius: 150px;">
+            <section class="section">
+                <section class="section docs-title">
+                    <div class="container">
+                        <h1 class="title-5 fw-700">Task 1 : Simple Backend Endpoint</h1><p class="subtitle"><b>Authenticated via Metamask</b> ,must install metamask plugin to login </p>
+                    </div>
+                </section>
+                <section class="section">
+                    <div class="container">
+                        <div class="mb-25">
+                            <button class="btn secondary mr-10" @click="login">Login</button><span v-if="loadingApi" class="spinner secondary"></span>
+                            Login details -
+                            <span v-if="publicAddress && access_token"><b>Username : </b>{{formData.username}} - <b>Email : </b>{{formData.email}}</span>
+                            <span v-else>Not logged in</span>
+                        </div>
 
-        
-        <button class="btn secondary" @click="get_score">Get Score</button>
-        <button class="btn secondary" @click="login">Login</button><span v-if="loadingApi" class="spinner secondary"></span>
-        
-        <div v-if="output">Output: {{output}}</div>
+                        <button class="btn secondary mr-10" @click="get_score">Get Score</button> /get_score - <code class="text-danger">result = input + 1</code>
+                        <div class="mb-25 flex wrap">
+                            <div class="form-element mr-10">
+                                <label class="label">Input:</label>
+                                <input type="text" v-model="input" class="input secondary flat" placeholder="Input" />
+                            </div>
+                            <div class="form-element">
+                                <label class="label">Output:</label>
+                                <input disabled type="text" v-model="output" class="input secondary flat" placeholder="output" />
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </section>
+        </div>
 
         <div class="modal prevent-close blurred" id="default_modal" :class="{ open: openRegisterModal}">
             <div class="modal-content">
@@ -67,12 +105,57 @@
             </div>
         </div>
 
+        <div class="docs bg-gray-2 mt-10" style="height: 100%;overflow: auto;border-top-left-radius: 150px;">
+            <section class="section">
+                <section class="section docs-title">
+                    <div class="container">
+                        <h1 class="title-5 fw-700">Task 2 : Admin Panel</h1>
+                    </div>
+                </section>
+                <section class="section">
+                    <div class="container">
+                        <div>
+                            Method 1 : <a target="_blank" href="/admin/"><span class="tag secondary">Django Admin Page</span></a>
+                            
+                        </div>
+                        <small>(Username & Password: admin)</small>
+
+                        <div class="mt-50">
+                            Method 2 : Custom built FrontEnd and BackEnd
+                            <div class="q-pa-md">
+                                <q-table
+                                  title="Treats"
+                                  :rows="rows"
+                                  :columns="columns"
+                                  row-key="id"
+                                  :filter="filter"
+                                  :loading="loading"
+                                >
+                            
+                                  <template v-slot:top>
+                                    <q-space />
+                                    <q-input borderless dense debounce="300" color="primary" v-model="filter">
+                                      <template v-slot:append>
+                                        <q-icon name="search" />
+                                      </template>
+                                    </q-input>
+                                  </template>
+                            
+                                </q-table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+        </div>
+
       {% endverbatim %}
     </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/quasar@2.10.1/dist/quasar.umd.js"></script>
     <script>
 
-        const { createApp } = Vue
+        const { createApp, ref } = Vue
 
         const app = createApp({
             data() {
@@ -86,6 +169,7 @@
                     email : null,
                 },
                 // input & output
+                input : null,
                 output : null,
 
                 // metamask wallet data
@@ -94,6 +178,41 @@
                 // authentication token,
                 refresh_token : null,
                 access_token : null,
+
+                //table
+                loading : false,
+                filter : '',
+                rowCount : 10,
+                rows : [
+                    {
+                        name: 'Frozen Yogurt',
+                        calories: 159,
+                        fat: 6.0,
+                        carbs: 24,
+                        protein: 4.0,
+                        sodium: 87,
+                        calcium: '14%',
+                        iron: '1%'
+                    },
+                ],
+                columns : [
+                    {
+                        name: 'name',
+                        required: true,
+                        label: 'Dessert (100g serving)',
+                        align: 'left',
+                        field: row => row.name,
+                        format: val => `${val}`,
+                        sortable: true
+                    },
+                    { name: 'calories', align: 'center', label: 'Calories', field: 'calories', sortable: true },
+                    { name: 'fat', label: 'Fat (g)', field: 'fat', sortable: true },
+                    { name: 'carbs', label: 'Carbs (g)', field: 'carbs' },
+                    { name: 'protein', label: 'Protein (g)', field: 'protein' },
+                    { name: 'sodium', label: 'Sodium (mg)', field: 'sodium' },
+                    { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
+                    { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
+                ]
             }
             },
             methods : {
@@ -131,6 +250,8 @@
                 // sign nonce
                 handle_nonce: async function(json_response){
                     this.nonce = json_response.nonce;
+                    this.formData.username = json_response.user.username;
+                    this.formData.email = json_response.user.email;
 
                     const signer = await this.get_signer();
                     const signed_nonce = await signer.signMessage(`I am signing my one-time nonce: ${this.nonce}`);
@@ -173,17 +294,20 @@
                 },
                 get_score: async function(){
                     
-                    fetch(`get_score?score=1`, {
+                    fetch(`get_score?score=${this.input}`, {
                         headers: new Headers({
                             'Authorization': 'Bearer '+this.access_token, 
                         }), 
                     })
-                    .then(response => response.ok? response.json() : alert("Not Authenticated!"))
-                    .then(response => this.output = response.Result)
+                    .then(response => response.ok || response.status != 403 ? response.json() : alert("Not Authenticated!"))
+                    .then(response => this.output = response.Result ? response.Result : response.Error)
 
-                }
+                },
             }
-        }).mount('#app')
+        })
+        
+        app.use(Quasar)
+        app.mount('#app')
 
     </script>
 
