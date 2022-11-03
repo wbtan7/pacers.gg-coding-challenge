@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "web3auth.apps.Web3AuthConfig",
+    "metaMaskAuth",
+    "Main",
 ]
 
 MIDDLEWARE = [
@@ -92,7 +93,7 @@ DATABASES = {
 if 'test' in sys.argv: # and 'keepdb' in sys.argv:
     # and this allows you to use --keepdb to skip re-creating the db,
     # even faster!
-    DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3'}
+    DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3', 'NAME': BASE_DIR/'db.sqlite3'}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -106,12 +107,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'web3auth.backend.Web3Backend'
-]
-WEB3AUTH_USER_ADDRESS_FIELD = 'username'
-WEB3AUTH_USER_SIGNUP_FIELDS = ['email',]
+AUTH_USER_MODEL = 'Main.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -124,11 +126,12 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
+
+STATICFILES_DIRS = [ BASE_DIR / "static" ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

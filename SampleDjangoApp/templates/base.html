@@ -1,90 +1,191 @@
-{% load static %}<!DOCTYPE html>
+{% load static i18n %}
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>{% block title %}SampleDjangoWeb3App{% endblock title %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="">
-  <meta name="author" content="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-  <!--[if lt IE 9]>
-  <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-  <![endif]-->
+    <!-- icon pack -->
+    <!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"> -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css" rel="stylesheet" />
 
-  {% block css %}
-    <!-- Latest compiled and minified Bootstrap 4 beta CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
-          integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <!-- styling -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gnb-ui@0.2.1-alpha/dist/gnb.min.css" />
 
-    <!-- Your stuff: Third-party css libraries go here -->
+    <!-- font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
 
-  {% endblock %}
-</head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My First dApp</title>
 
-<body>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-<div class="m-b-1">
-  <nav class="navbar navbar-expand-md navbar-light bg-light">
-    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
-            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-            aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <a class="navbar-brand" href="#">Sample Django Web3 App</a>
+    <!-- web 3 related package -->
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-          <a class="nav-link">Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Autologin</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link">Signup</a>
-        </li>
-      </ul>
+  </head>
+  <body>
+
+    <div id="app">
+        {% verbatim %}
+
+        
+        <button class="btn secondary" @click="get_score">Get Score</button>
+        <button class="btn secondary" @click="login">Login</button><span v-if="loadingApi" class="spinner secondary"></span>
+        
+        <div v-if="output">Output: {{output}}</div>
+
+        <div class="modal prevent-close blurred" id="default_modal" :class="{ open: openRegisterModal}">
+            <div class="modal-content">
+                <button class="close" @click="openRegisterModal=!openRegisterModal"></button>
+                <header class="modal-header">
+                <h4>Register to continue</h4>
+                </header>
+                <div class="modal-body">
+                    <form @submit.prevent="submit_sign_up">
+                        <div class="form-element has-icon-before">
+                            <!-- <label class="label">Username:</label> -->
+                            <input type="text" class="input" v-model="formData.username" required placeholder="Username" />
+                            <div class="input-icon">
+                                <i class="ri-user-follow-line"></i>
+                            </div>
+                        </div>
+                        <div class="form-element has-icon-before">
+                            <!-- <label class="label">Email:</label> -->
+                            <input type="email" class="input" v-model="formData.email" required placeholder="Email" />
+                            <div class="input-icon">
+                                <i class="ri-at-line"></i>
+                            </div>
+                        </div>
+                        <button class="btn secondary block" type="submit" >Register Here</button>
+                    </form>
+                </div>
+                <footer class="modal-footer text-center">
+                </footer>
+            </div>
+        </div>
+
+      {% endverbatim %}
     </div>
-  </nav>
 
-</div>
-<div class="container">
+    <script>
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
+        const { createApp } = Vue
 
-  {% block content %}
-    <div class="row m-t-2">
-      <p>Use this document as a way to quick start any new project.</p>
-      <p>The current template is loaded from
-        <code>django-web3-auth/example/templates/base.html</code>. </p>
-      <p>Whenever you overwrite the contents of <code>django-web3-auth/web3auth/urls.py</code> with your
-        own content, you should see it here.</p>
-    </div>
-  {% endblock content %}
+        const app = createApp({
+            data() {
+            return {
 
-</div> <!-- /container -->
+                // web page data
+                openRegisterModal : false,
+                loadingApi : false,
+                formData : {
+                    username : null,
+                    email : null,
+                },
+                // input & output
+                output : null,
 
-{% block modal %}{% endblock modal %}
+                // metamask wallet data
+                publicAddress : null,
+                nonce : null,
+                // authentication token,
+                refresh_token : null,
+                access_token : null,
+            }
+            },
+            methods : {
+                handle_sign_up : function (){
+                    this.openRegisterModal = true;
+                },
+                submit_sign_up : function(){
+                    fetch(`metamask/`, {
+                        body: JSON.stringify({
+                            user : this.formData,
+                            public_address : this.publicAddress
+                        }),
+                        headers: {
+                            'Content-Type' : 'application/json'
+                        },
+                        method: 'POST'
+                    }).then(response => {
+                        if(response.ok){
+                            response = response.json();
+                            this.handle_nonce(resposne)
+                            this.openRegisterModal = false;
+                        }else{
+                            alert("Failed signup! Please try again later!");
+                        }
+                    })
+                },
+                get_signer : async function(){
+                    // get public address
+                    const provider = new ethers.providers.Web3Provider(window.ethereum, "goerli");
+                    await provider.send("eth_requestAccounts", [])
+                    const accounts = await provider.listAccounts()
+                    const signer = provider.getSigner(accounts[0]);
+                    return signer
+                },
+                // sign nonce
+                handle_nonce: async function(json_response){
+                    this.nonce = json_response.nonce;
 
-<!-- Le javascript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-{% block javascript %}
-  <!-- Latest JQuery -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+                    const signer = await this.get_signer();
+                    const signed_nonce = await signer.signMessage(`I am signing my one-time nonce: ${this.nonce}`);
+                    this.handle_authentication(signed_nonce);
 
-  <!-- Tether - a requirement for Bootstrap tooltips -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js"></script>
+                },
+                handle_authentication: function(signature){
+                    fetch(`metamask/login/${this.publicAddress}`, {
+                        body: JSON.stringify({ signature : signature }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'POST'
+                    }).then(response => response.json())
+                    .then( response => {
+                        this.refresh_token = response.refresh;
+                        this.access_token = response.access;
+                    });
+                },
+                login : async function (){
+                    
+                    // get signer if null
+                    const signer = await this.get_signer();
+                    this.publicAddress = await signer.getAddress();
+                    
+                    // check if user with current public address is already present on back end
+                    this.loadingApi = true
+                    fetch(`metamask/${this.publicAddress}`)
+                    // if yes, retrieve it. if no, create it.
+                    .then(response => {
+                        if(response.ok ){
+                            return response.json()
+                        }
+                        else {
+                            this.handle_sign_up()
+                        }
+                    })
+                    .then(response => this.handle_nonce(response))
+                    .finally( () => this.loadingApi = false )
+                },
+                get_score: async function(){
+                    
+                    fetch(`get_score?score=1`, {
+                        headers: new Headers({
+                            'Authorization': 'Bearer '+this.access_token, 
+                        }), 
+                    })
+                    .then(response => response.ok? response.json() : alert("Not Authenticated!"))
+                    .then(response => this.output = response.Result)
 
-  <!-- Latest compiled and minified JavaScript -->
-  <script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js"></script>
+                }
+            }
+        }).mount('#app')
 
-{% endblock javascript %}
-</body>
+    </script>
+
+  </body>
 </html>
