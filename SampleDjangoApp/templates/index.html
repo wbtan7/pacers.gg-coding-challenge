@@ -9,14 +9,15 @@
     <!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"> -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.2.0/fonts/remixicon.css" rel="stylesheet" />
 
-    <!-- styling -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gnb-ui@0.2.1-alpha/dist/gnb.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/quasar@2.10.1/dist/quasar.prod.css" rel="stylesheet" type="text/css">
-
     <!-- font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+    
+    <!-- styling -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gnb-ui@0.2.1-alpha/dist/gnb.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/quasar@2.10.1/dist/quasar.prod.css" rel="stylesheet" type="text/css">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pacer Coding Challenge by WB</title>
@@ -115,31 +116,42 @@
                 <section class="section">
                     <div class="container">
                         <div>
-                            Method 1 : <a target="_blank" href="/admin/"><span class="tag secondary">Django Admin Page</span></a>
+                            <b>Method 1 : </b> <a target="_blank" href="/admin/"><span class="tag secondary">Django Admin Page</span></a>
                             
                         </div>
                         <small>(Username & Password: admin)</small>
 
                         <div class="mt-50">
-                            Method 2 : Custom built FrontEnd and BackEnd
-                            <div class="q-pa-md">
+                            <p><b>Method 2 : </b> Custom built FrontEnd and BackEnd</p>
+                            <p> - Use the search bar to search any row/columns</p>
+                            <p> - Click on any individual score to do inline editng</p>
+                            <div class="q-pa-ma">
                                 <q-table
-                                  title="Treats"
                                   :rows="rows"
                                   :columns="columns"
                                   row-key="id"
                                   :filter="filter"
                                   :loading="loading"
+                                  rows-per-page-label="Row/Page:"
                                 >
                             
-                                  <template v-slot:top>
-                                    <q-space />
-                                    <q-input borderless dense debounce="300" color="primary" v-model="filter">
-                                      <template v-slot:append>
-                                        <q-icon name="search" />
-                                      </template>
-                                    </q-input>
+                                  <template v-slot:top-right>
+                                    <div class="form-element">
+                                        <input type="text" class="input secondary flat text-center mr-40 square bordered" v-model="filter" placeholder="Search" />
+                                    </div>
                                   </template>
+
+                                    <template v-slot:body-cell-score="props">
+                                        <q-td :props="props">
+                                            {{ props.row.score }}
+                                            <q-popup-edit v-model="props.row.score" v-slot="scope">
+                                                <div class="form-element">
+                                                    <input type="text" class="input secondary flat text-center" v-model="scope.value" placeholder="Name" />
+                                                </div>
+                                                <button class="btn secondary block" @click="update_score(props.row.id, scope.value)" >Update</button>
+                                            </q-popup-edit>
+                                        </q-td>
+                                    </template>
                             
                                 </q-table>
                             </div>
@@ -179,39 +191,15 @@
                 refresh_token : null,
                 access_token : null,
 
-                //table
-                loading : false,
+                // table
+                loading : true,
                 filter : '',
                 rowCount : 10,
-                rows : [
-                    {
-                        name: 'Frozen Yogurt',
-                        calories: 159,
-                        fat: 6.0,
-                        carbs: 24,
-                        protein: 4.0,
-                        sodium: 87,
-                        calcium: '14%',
-                        iron: '1%'
-                    },
-                ],
+                rows : [],
                 columns : [
-                    {
-                        name: 'name',
-                        required: true,
-                        label: 'Dessert (100g serving)',
-                        align: 'left',
-                        field: row => row.name,
-                        format: val => `${val}`,
-                        sortable: true
-                    },
-                    { name: 'calories', align: 'center', label: 'Calories', field: 'calories', sortable: true },
-                    { name: 'fat', label: 'Fat (g)', field: 'fat', sortable: true },
-                    { name: 'carbs', label: 'Carbs (g)', field: 'carbs' },
-                    { name: 'protein', label: 'Protein (g)', field: 'protein' },
-                    { name: 'sodium', label: 'Sodium (mg)', field: 'sodium' },
-                    { name: 'calcium', label: 'Calcium (%)', field: 'calcium', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) },
-                    { name: 'iron', label: 'Iron (%)', field: 'iron', sortable: true, sort: (a, b) => parseInt(a, 10) - parseInt(b, 10) }
+                    { name: 'id', required: true, label: 'Id', field:"id" , align: 'center', sortable: true},
+                    { name: 'score', align: 'center', label: 'Score', field: 'score', sortable: true },
+                    { name: 'username', align: 'center', label: 'Username', field: 'username', sortable: true },
                 ]
             }
             },
@@ -303,10 +291,35 @@
                     .then(response => this.output = response.Result ? response.Result : response.Error)
 
                 },
+                update_score : function(id, update_value){
+
+                    this.$q.loading.show()
+                    fetch(`/score_log/${id}/`, {
+                        body: JSON.stringify({ score : update_value }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'PATCH'
+                    }).then(response => this.rows.find(row => row.id == id).score = update_value)
+                    .finally( () => this.$q.loading.hide());
+                }
+            },
+            created(){
+
+                // for task 2 custom table
+                fetch(`/score_log/`)
+                    // if yes, retrieve it. if no, create it.
+                    .then(response => response.ok ? response.json() : response)
+                    .then(response => this.rows = response)
+                    .finally( () => this.loading = false )
             }
         })
         
-        app.use(Quasar)
+        app.use(Quasar,{
+            config: {
+                loading: { boxClass : "text-deep-purple-7" }
+            }
+        })
         app.mount('#app')
 
     </script>

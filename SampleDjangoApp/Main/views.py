@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -6,9 +6,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import render
 
 from Main.models import ScoreLog
+from Main.serializers import ScoreLogSerializer
 
 def index(request):
-    return render(request, 'base.html')
+    return render(request, 'index.html')
 
 class GetScore(APIView):
 
@@ -31,3 +32,8 @@ class GetScore(APIView):
         ScoreLog.objects.create(user=request.user, score=output_score)
 
         return Response({"Result":output_score})
+
+class ScoreLogViewSet(viewsets.ModelViewSet):
+
+    queryset = ScoreLog.objects.all()
+    serializer_class = ScoreLogSerializer
