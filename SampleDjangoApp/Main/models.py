@@ -9,3 +9,5 @@ class ScoreLog(models.Model):
 
     score = models.FloatField(null=False, blank=False)
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
+
+    # test_col = models.CharField(null=True, blank=True, max_length=2)

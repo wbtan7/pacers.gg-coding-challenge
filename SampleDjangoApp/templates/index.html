@@ -112,10 +112,9 @@
                     <div class="container">
                         <h1 class="title-5 fw-700">Task 2 : Admin Panel</h1>
                     </div>
-                </section>
-                <section class="section">
+                
                     <div class="container">
-                        <div>
+                        <div class="mt-20">
                             <b>Method 1 : </b> <a target="_blank" href="/admin/"><span class="tag secondary">Django Admin Page</span></a>
                             
                         </div>
@@ -287,7 +286,7 @@
                             'Authorization': 'Bearer '+this.access_token, 
                         }), 
                     })
-                    .then(response => response.ok || response.status != 403 ? response.json() : alert("Not Authenticated!"))
+                    .then(response => response.ok || response.status != 401 ? response.json() : alert("Not Authenticated!"))
                     .then(response => this.output = response.Result ? response.Result : response.Error)
 
                 },

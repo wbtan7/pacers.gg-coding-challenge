@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from Main.models import User
+from Main.models import User, ScoreLog
 
 class SimpleBackendTest(APITestCase):
     url = reverse('score-get')
@@ -17,6 +17,7 @@ class SimpleBackendTest(APITestCase):
         response = self.client.get(self.url, {"score" : 0})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["Result"], 1)
+        # self.assertEqual(ScoreLog.objects.get().test_col, None)
 
     def test_get_score_positive_first(self):
         # test first positive score
