@@ -12,7 +12,7 @@ services: # the different images that will be running as containers
     
 # static storages provisioned since django does not handle static files in production
     volumes:  
-        - static_volume:/home/app/web_app/staticfiles
+        - static_volume:/microservice/staticfiles
 
 # name of the image
     image: pacer_challenge_nginx
@@ -38,7 +38,7 @@ services: # the different images that will be running as containers
 # map data and files from parent directory in host to microservice directory in docker container
     volumes: 
         # - .:/microservice 
-        - static_volume:/home/app/web_app/staticfiles
+        - static_volume:/microservice/staticfiles
 
 # name of the image
     image: pacer_challenge_app

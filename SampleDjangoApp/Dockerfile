@@ -1,7 +1,7 @@
 # base image  
 FROM python:3.10.6
 # setup environment variable  
-ENV DockerHOME=/home/app/web_app  
+ENV DockerHOME=/microservice
 
 # set work directory  
 RUN mkdir -p $DockerHOME  
