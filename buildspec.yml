@@ -12,7 +12,8 @@ phases:
     on-failure: ABORT
     commands:
       - echo Run automated test... | tee -a log.txt
-      - python3 SampleDjangoApp/manage.py test Main
+      - cd SampleDjangoApp && python3 manage.py test Main
+      - cd ..
       - echo Logging in to Amazon ECR... | tee -a log.txt
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - echo Pulling Docker Images for cache ... | tee -a log.txt
