@@ -1,7 +1,7 @@
 # base image  
 FROM python:3.10.6
 # setup environment variable  
-ENV DockerHOME=/home/app/webapp  
+ENV DockerHOME=/home/app/web_app  
 
 # set work directory  
 RUN mkdir -p $DockerHOME  
@@ -23,4 +23,4 @@ RUN pip install -r requirements.txt
 # port where the Django app runs  
 EXPOSE 8000  
 # start server  
-CMD python manage.py runserver 0.0.0.0:8000
+# CMD python manage.py runserver
