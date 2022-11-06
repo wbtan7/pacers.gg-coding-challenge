@@ -28,7 +28,7 @@ phases:
       - echo Build completed on `date` | tee -a log.txt
       - echo Pushing the Docker image... | tee -a log.txt
       - docker-compose push 2>&1 | tee -a log.txt
-      - printf '[{"name":"pacer-challenge-django","imageUri":"%s"}]' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"pace-coding-challenge","imageUri":"%s"}]' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
     files: imagedefinitions.json
