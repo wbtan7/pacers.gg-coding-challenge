@@ -27,9 +27,10 @@ class GetScore(APIView):
         
         # processing the input
         output_score = input_score + 1
+        output_score_2 = input_score + 2
 
         # saving output to db
-        ScoreLog.objects.create(user=request.user, score=output_score)
+        ScoreLog.objects.create(user=request.user, score=output_score, score_2=output_score_2)
 
         return Response({"Result":output_score})
 

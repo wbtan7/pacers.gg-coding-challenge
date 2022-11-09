@@ -19,6 +19,8 @@ class SimpleBackendTest(APITestCase):
         self.assertEqual(response.data["Result"], 1)
         # self.assertEqual(ScoreLog.objects.get().test_col, None)
 
+        self.assertEqual(ScoreLog.objects.get().score_2, '2.0')
+
     def test_get_score_positive_first(self):
         # test first positive score
         self.client.force_authenticate(self.user)
